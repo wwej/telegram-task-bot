@@ -32,7 +32,7 @@ def webhook():
     if "message" in data:
         chat_id = data["message"]["chat"]["id"]
         text = data["message"].get("text", "")
-        reply = f"📌 收到了喔！你剛剛說：「{text}」"
+        reply = f"📌 我幫你記下來了：這是「{classification}」"
         requests.post(f"{API_URL}/sendMessage", json={
             "chat_id": chat_id,
             "text": reply
