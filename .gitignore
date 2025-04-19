@@ -1,0 +1,2 @@
+.env
+git commit -m "chore: remove .env from version control"

@@ -7,6 +7,21 @@ app = Flask(__name__)
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
+def classify_message(text):
+    # 定義關鍵詞或日期格式
+    date_keywords = ["今天", "明天", "後天", "下週", "下禮拜", "點", "下午", "早上", "上午", "晚上"]
+    date_pattern = r"\d{1,2}/\d{1,2}|\d{4}-\d{1,2}-\d{1,2}|\d{1,2}月\d{1,2}日"
+
+    # 關鍵詞比對
+    for keyword in date_keywords:
+        if keyword in text:
+            return "活動"
+    # 正規比對日期格式
+    if re.search(date_pattern, text):
+        return "活動"
+    # 否則歸類為待辦
+    return "待辦"
+
 @app.route("/", methods=["GET"])
 def health():
     return "OK", 200
