@@ -24,6 +24,10 @@ def classify_message(text):
     return "待辦"
 
 @app.route("/", methods=["GET"])
+def health():
+    return "OK", 200
+
+@app.route("/", methods=["POST"])
 def webhook():
     data = request.get_json()
 
