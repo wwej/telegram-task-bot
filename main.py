@@ -42,7 +42,23 @@ def save_to_google_sheet(sheet_name, row_data):
     sheet = client.open("任務秘書資料表").worksheet(sheet_name)
     sheet.append_row(row_data)
 
+def get_todo_list(chat_id):
+    try:
+        sheet = client.open("任務秘書資料表").worksheet("待辦")
+        records = sheet.get_all_records()
 
+        # 過濾符合使用者 Chat ID 的資料
+        user_todos = [
+            f"{idx+1}. {row['內容']}（建立時間：{row['時間/建立時間']}）"
+            for idx, row in enumerate(records)
+            if str(row.get("Chat ID", "")) == str(chat_id)
+        ]
+
+        return "\n".join(user_todos)
+    except Exception as e:
+        print(f"⚠️ get_todo_list 錯誤：{e}")
+        return "❌ 查詢失敗，請稍後再試。"
+    
 @app.route("/", methods=["GET"])
 def health():
     return "OK", 200
@@ -56,6 +72,16 @@ def webhook():
     if "message" in data:
         chat_id = data["message"]["chat"]["id"]
         text = data["message"].get("text", "")
+        
+        if text.strip().lower() == "/todo":
+            todos = get_todo_list(chat_id)
+            reply_text = "📋 你的待辦清單：\n\n" + todos if todos else "✅ 沒有待辦事項！"
+            requests.post(f"{API_URL}/sendMessage", json={
+                "chat_id": chat_id,
+                "text": reply_text
+            })
+            return "OK", 200
+
         classification = classify_message(text)
 
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -77,3 +103,12 @@ def webhook():
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
 
+import requests
+
+def send_message(chat_id, text):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": text
+    }
+    requests.post(url, json=payload)
