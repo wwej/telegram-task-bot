@@ -66,7 +66,38 @@ def get_todo_list(chat_id):
     except Exception as e:
         print(f"⚠️ get_todo_list 錯誤：{e}")
         return "❌ 查詢失敗，請稍後再試。"
-    
+
+def handle_done(chat_id, keyword):
+    try:
+        sheet = client.open("任務秘書資料表").worksheet("待辦")
+        records = sheet.get_all_records()
+
+        matched_rows = [
+            (idx + 2, row)  # Google Sheets 的資料列從第2列開始（第1列是欄位名稱）
+            for idx, row in enumerate(records)
+            if str(row.get("Chat ID", "")) == str(chat_id) and keyword in row.get("內容", "")
+        ]
+
+        if len(matched_rows) == 0:
+            return f"❌ 沒有找到包含「{keyword}」的待辦事項"
+
+        elif len(matched_rows) == 1:
+            row_number, matched = matched_rows[0]
+            sheet.delete_rows(row_number)
+            return f"✅ 已完成任務「{matched['內容']}」"
+
+        else:
+            # 多筆符合：列出讓使用者看
+            response = f"⚠️ 找到多筆符合「{keyword}」的任務，請輸入更精確的關鍵字或稍後我來幫你做選單：\n\n"
+            for i, (row_num, row) in enumerate(matched_rows):
+                response += f"{i+1}. {row['內容']}（建立時間：{row['建立時間']}）\n"
+            return response
+
+    except Exception as e:
+        print(f"⚠️ handle_done 錯誤：{e}")
+        return "❌ 執行失敗，請稍後再試"
+
+
 @app.route("/", methods=["GET"])
 def health():
     return "OK", 200
@@ -87,6 +118,15 @@ def webhook():
             requests.post(f"{API_URL}/sendMessage", json={
                 "chat_id": chat_id,
                 "text": reply_text
+            })
+            return "OK", 200
+
+        if text.strip().lower().startswith("/done "):
+            keyword = text[6:].strip()  # 拿掉 "/done " 字串
+            result = handle_done(chat_id, keyword)
+            requests.post(f"{API_URL}/sendMessage", json={
+                "chat_id": chat_id,
+                "text": result
             })
             return "OK", 200
 
