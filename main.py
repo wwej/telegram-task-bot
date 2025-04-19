@@ -24,10 +24,6 @@ def classify_message(text):
     return "待辦"
 
 @app.route("/", methods=["GET"])
-def health():
-    return "OK", 200
-
-@app.route("/", methods=["POST"])
 def webhook():
     data = request.get_json()
 
@@ -35,6 +31,13 @@ def webhook():
         chat_id = data["message"]["chat"]["id"]
         text = data["message"].get("text", "")
         classification = classify_message(text)
+
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        if classification == "活動":
+            save_to_google_sheet("活動", [now, classification, text, chat_id])
+        else:
+            save_to_google_sheet("待辦", [now, classification, text, chat_id])
 
         reply = f"📌 我幫你記下來了：這是「{classification}」"
         requests.post(f"{API_URL}/sendMessage", json={
@@ -44,5 +47,23 @@ def webhook():
 
     return "OK", 200
 
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
+
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from datetime import datetime
+import json
+
+def get_gsheet_client():
+    creds_dict = json.loads(os.getenv("GOOGLE_CREDS_JSON"))
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+    client = gspread.authorize(credentials)
+    return client
+
+def save_to_google_sheet(sheet_name, row_data):
+    client = get_gsheet_client()
+    sheet = client.open("任務秘書資料表").worksheet(sheet_name)
+    sheet.append_row(row_data)
