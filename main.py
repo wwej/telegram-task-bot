@@ -1,9 +1,8 @@
-from datetime import datetime
-
 from flask import Flask, request
 import os
 import requests
 import re
+from datetime import datetime
 
 app = Flask(__name__)
 
