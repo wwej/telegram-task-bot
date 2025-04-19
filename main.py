@@ -1,6 +1,7 @@
 from flask import Flask, request
 import os
 import requests
+import re
 
 app = Flask(__name__)
 
@@ -29,14 +30,18 @@ def health():
 @app.route("/", methods=["POST"])
 def webhook():
     data = request.get_json()
+
     if "message" in data:
         chat_id = data["message"]["chat"]["id"]
         text = data["message"].get("text", "")
+        classification = classify_message(text)
+
         reply = f"📌 我幫你記下來了：這是「{classification}」"
         requests.post(f"{API_URL}/sendMessage", json={
             "chat_id": chat_id,
             "text": reply
         })
+
     return "OK", 200
 
 if __name__ == "__main__":
