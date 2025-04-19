@@ -24,6 +24,25 @@ def classify_message(text):
     # 否則歸類為待辦
     return "待辦"
 
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from datetime import datetime
+import json
+
+def get_gsheet_client():
+    creds_dict = json.loads(os.getenv("GOOGLE_CREDS_JSON"))
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+    client = gspread.authorize(credentials)
+    return client
+
+def save_to_google_sheet(sheet_name, row_data):
+    print(f"✅ 寫入 {sheet_name}：{row_data}")
+    client = get_gsheet_client()
+    sheet = client.open("任務秘書資料表").worksheet(sheet_name)
+    sheet.append_row(row_data)
+
+
 @app.route("/", methods=["GET"])
 def health():
     return "OK", 200
@@ -58,20 +77,3 @@ def webhook():
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
 
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime
-import json
-
-def get_gsheet_client():
-    creds_dict = json.loads(os.getenv("GOOGLE_CREDS_JSON"))
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-    client = gspread.authorize(credentials)
-    return client
-
-def save_to_google_sheet(sheet_name, row_data):
-    print(f"✅ 寫入 {sheet_name}：{row_data}")
-    client = get_gsheet_client()
-    sheet = client.open("任務秘書資料表").worksheet(sheet_name)
-    sheet.append_row(row_data)
