@@ -27,8 +27,10 @@ def classify_message(text):
 def health():
     return "OK", 200
 
+
 @app.route("/", methods=["POST"])
 def webhook():
+    print("📬 收到 POST 請求")
     data = request.get_json()
 
     if "message" in data:
@@ -68,6 +70,7 @@ def get_gsheet_client():
     return client
 
 def save_to_google_sheet(sheet_name, row_data):
+    print(f"✅ 寫入 {sheet_name}：{row_data}")
     client = get_gsheet_client()
     sheet = client.open("任務秘書資料表").worksheet(sheet_name)
     sheet.append_row(row_data)
