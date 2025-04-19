@@ -3,6 +3,7 @@ import os
 import requests
 import re
 from datetime import datetime
+import pytz
 
 app = Flask(__name__)
 
@@ -56,7 +57,7 @@ def get_todo_list(chat_id):
 
         # 過濾符合使用者 Chat ID 的資料
         user_todos = [
-            f"{idx+1}. {row['內容']}（建立時間：{row['建立時間']}）"
+            f"{idx+1}. {row['內容']}\n（🕒建立時間：{row['建立時間']}）"
             for idx, row in enumerate(records)
             if str(row.get("Chat ID", "")) == str(chat_id)
         ]
@@ -91,7 +92,9 @@ def webhook():
 
         classification = classify_message(text)
 
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        tz = pytz.timezone("Asia/Taipei")
+        now = datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
+        
 
         if classification == "活動":
             save_to_google_sheet("活動", [now, classification, text, chat_id])
