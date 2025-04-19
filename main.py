@@ -29,6 +29,11 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
 
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+creds_dict = json.loads(os.environ["GOOGLE_CREDS_JSON"])
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+client = gspread.authorize(creds)
+
 def get_gsheet_client():
     creds_dict = json.loads(os.getenv("GOOGLE_CREDS_JSON"))
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -43,6 +48,7 @@ def save_to_google_sheet(sheet_name, row_data):
     sheet.append_row(row_data)
 
 def get_todo_list(chat_id):
+    global client
     try:
         sheet = client.open("任務秘書資料表").worksheet("待辦")
         records = sheet.get_all_records()
