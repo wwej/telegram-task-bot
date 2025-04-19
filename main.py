@@ -56,7 +56,7 @@ def get_todo_list(chat_id):
 
         # 過濾符合使用者 Chat ID 的資料
         user_todos = [
-            f"{idx+1}. {row['內容']}（建立時間：{row['時間/建立時間']}）"
+            f"{idx+1}. {row['內容']}（建立時間：{row['建立時間']}）"
             for idx, row in enumerate(records)
             if str(row.get("Chat ID", "")) == str(chat_id)
         ]
