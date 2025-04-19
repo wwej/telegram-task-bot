@@ -46,6 +46,7 @@ def get_todo_list(chat_id):
     try:
         sheet = client.open("任務秘書資料表").worksheet("待辦")
         records = sheet.get_all_records()
+        print("📄 抓到記錄：", records)
 
         # 過濾符合使用者 Chat ID 的資料
         user_todos = [
