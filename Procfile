@@ -1,2 +1,0 @@
-web: python main.py
-job: python daily_push.py
