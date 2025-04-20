@@ -88,9 +88,9 @@ def handle_done(chat_id, keyword):
 
         else:
             # 多筆符合：列出讓使用者看
-            response = f"⚠️ 找到多筆符合「{keyword}」的任務，請輸入更精確的關鍵字或稍後我來幫你做選單：\n\n"
+            response = f"⚠️ 找到多筆符合「{keyword}」的任務，請輸入更精確的關鍵字或詳下列清單：\n\n"
             for i, (row_num, row) in enumerate(matched_rows):
-                response += f"{i+1}. {row['內容']}（建立時間：{row['建立時間']}）\n"
+                response += f"{i+1}. {row['內容']}\n（{row['建立時間']}建立）\n"
             return response
 
     except Exception as e:
