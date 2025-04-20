@@ -31,7 +31,7 @@ records_todo = sheet_todo.get_all_records()
 user_messages = {}
 
 for row in records_act:
-    if row["時間/建立時間"].startswith(today):
+    if row["時間"].startswith(today):
         chat_id = str(row["Chat ID"])
         user_messages.setdefault(chat_id, []).append(f"📆 今日活動：{row['內容']}")
 
@@ -41,6 +41,7 @@ for row in records_todo:
 
 # === 發送訊息 ===
 for chat_id, items in user_messages.items():
+    print(f"📤 要推播給 {chat_id} 的訊息：\n" + "\n".join(items))
     message = f"📣 每日提醒：\n\n" + "\n".join(items)
     requests.post(API_URL, json={
         "chat_id": chat_id,
