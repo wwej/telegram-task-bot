@@ -28,7 +28,7 @@ user_messages = {}
 for row in records_act:
     print(f"👉 活動欄位：{row.keys()}")
     # 嘗試改欄位名成「建立時間」
-    if row["建立時間"].startswith(today):
+    if row["時間"].startswith(today):
         chat_id = str(row["Chat ID"])
         user_messages.setdefault(chat_id, []).append(f"📆 今日活動：{row['內容']}")
 
